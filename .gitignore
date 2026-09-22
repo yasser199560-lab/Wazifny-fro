@@ -1,0 +1,16 @@
+# Dependencies and generated output
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+!.env.local.example
+
+# OS / editor files
+.DS_Store
+.vscode/
+.idea/
