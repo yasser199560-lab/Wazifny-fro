@@ -5,7 +5,6 @@ import { AlertTriangle, BookOpen, Clock, ExternalLink, Loader2, Search, Sparkles
 import TalentShell from "@/components/talent/TalentShell";
 import { getCourses, getSkillGap, type Course, type SkillGapResponse } from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
-import { safeExternalUrl } from "@/lib/safe-url";
 
 const SEVERITY_COLOR: Record<string, string> = {
   "High Gap": "bg-red-50 text-red-500",
@@ -56,7 +55,7 @@ function CourseCard({ course, badge, onView }: { course: Course; badge?: string;
         </div>
         <div className="mt-4 grid grid-cols-2 gap-2">
           <button onClick={() => onView(course)} className="rounded-lg border border-wazifny-green px-3 py-2 text-sm font-semibold text-wazifny-green hover:bg-wazifny-green/5">View course</button>
-          {safeExternalUrl(course.url) ? <a href={safeExternalUrl(course.url)!} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-1 rounded-lg bg-wazifny-green px-3 py-2 text-sm font-semibold text-white hover:bg-wazifny-green-dark">Start <ExternalLink className="h-3.5 w-3.5" /></a> : <span className="rounded-lg bg-slate-100 px-3 py-2 text-center text-sm text-slate-500">Coming soon</span>}
+          {course.url ? <a href={course.url} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-1 rounded-lg bg-wazifny-green px-3 py-2 text-sm font-semibold text-white hover:bg-wazifny-green-dark">Start <ExternalLink className="h-3.5 w-3.5" /></a> : <span className="rounded-lg bg-slate-100 px-3 py-2 text-center text-sm text-slate-500">Coming soon</span>}
         </div>
       </div>
     </div>
@@ -161,7 +160,7 @@ export default function CoursesPage() {
           </div>
         </>
       )}
-      {selectedCourse && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/45 p-4" role="dialog" aria-modal="true"><div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl"><div className="flex h-32 items-center justify-center bg-gradient-to-br from-wazifny-green to-wazifny-navy"><BookOpen className="h-10 w-10 text-white/80" /></div><div className="p-6"><div className="flex items-start justify-between gap-4"><div><p className="text-sm font-semibold text-wazifny-green">{selectedCourse.provider}</p><h2 className="mt-1 text-2xl font-bold text-wazifny-navy">{selectedCourse.title}</h2></div><button onClick={() => setSelectedCourse(null)} className="rounded-lg p-2 text-slate-500 hover:bg-slate-100" aria-label="Close"><X className="h-5 w-5" /></button></div><p className="mt-4 text-slate-600">Develop practical {selectedCourse.skill_tag} skills with this {selectedCourse.duration_weeks}-week course, rated {selectedCourse.rating}/5 by learners.</p><div className="mt-6 flex justify-end gap-3"><button onClick={() => setSelectedCourse(null)} className="rounded-lg border px-4 py-2 font-medium text-wazifny-navy">Close</button>{safeExternalUrl(selectedCourse.url) && <a href={safeExternalUrl(selectedCourse.url)!} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-lg bg-wazifny-green px-4 py-2 font-semibold text-white">Start course <ExternalLink className="h-4 w-4" /></a>}</div></div></div></div>}
+      {selectedCourse && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/45 p-4" role="dialog" aria-modal="true"><div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl"><div className="flex h-32 items-center justify-center bg-gradient-to-br from-wazifny-green to-wazifny-navy"><BookOpen className="h-10 w-10 text-white/80" /></div><div className="p-6"><div className="flex items-start justify-between gap-4"><div><p className="text-sm font-semibold text-wazifny-green">{selectedCourse.provider}</p><h2 className="mt-1 text-2xl font-bold text-wazifny-navy">{selectedCourse.title}</h2></div><button onClick={() => setSelectedCourse(null)} className="rounded-lg p-2 text-slate-500 hover:bg-slate-100" aria-label="Close"><X className="h-5 w-5" /></button></div><p className="mt-4 text-slate-600">Develop practical {selectedCourse.skill_tag} skills with this {selectedCourse.duration_weeks}-week course, rated {selectedCourse.rating}/5 by learners.</p><div className="mt-6 flex justify-end gap-3"><button onClick={() => setSelectedCourse(null)} className="rounded-lg border px-4 py-2 font-medium text-wazifny-navy">Close</button>{selectedCourse.url && <a href={selectedCourse.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-lg bg-wazifny-green px-4 py-2 font-semibold text-white">Start course <ExternalLink className="h-4 w-4" /></a>}</div></div></div></div>}
     </TalentShell>
   );
 }

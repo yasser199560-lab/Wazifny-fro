@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Briefcase, Loader2, Pencil, Users } from "lucide-react";
 import EmployerShell from "@/components/employer/EmployerShell";
-import { getJob, type Job } from "@/lib/api";
-import { safeExternalUrl } from "@/lib/safe-url";
+import { getMyJob, type Job } from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
 
 export default function EmployerJobDetailsPage({ params }: { params: { id: string } }) {
@@ -15,11 +14,9 @@ export default function EmployerJobDetailsPage({ params }: { params: { id: strin
 
   useEffect(() => {
     if (!token) return;
-    let cancelled = false;
-    getJob(params.id, token)
-      .then((result) => { if (!cancelled) setJob(result); })
-      .catch((reason) => { if (!cancelled) setError(reason instanceof Error ? reason.message : "Could not load this job."); });
-    return () => { cancelled = true; };
+    getMyJob(token, params.id)
+      .then(setJob)
+      .catch((reason) => setError(reason instanceof Error ? reason.message : "Could not load this job."));
   }, [token, params.id]);
 
   if (!job && !error) {
@@ -38,7 +35,7 @@ export default function EmployerJobDetailsPage({ params }: { params: { id: strin
           <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-wazifny-green/10 text-wazifny-green"><Briefcase className="h-6 w-6" /></span>
           <div>
             <h1 className="text-2xl font-bold text-wazifny-navy">{job.title}</h1>
-            <p className="mt-1 text-sm capitalize text-slate-500">{job.category} · {job.location} · {job.job_type.replaceAll("_", " ")}</p>
+            <p className="mt-1 text-sm text-slate-500">{job.category} · {job.location} · {job.job_type.replaceAll("_", " ")}</p>
             <div className="mt-3 flex flex-wrap gap-2 text-xs">
               <span className="rounded-full bg-slate-100 px-3 py-1 font-semibold capitalize text-slate-600">{job.status.replaceAll("_", " ")}</span>
               <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-600">{job.applicants_count ?? 0} applicants</span>
@@ -46,7 +43,7 @@ export default function EmployerJobDetailsPage({ params }: { params: { id: strin
             </div>
           </div>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex gap-2">
           <Link href={`/employer/post-job?edit=${job.id}`} className="inline-flex items-center gap-2 rounded-lg bg-wazifny-green px-4 py-2.5 text-sm font-semibold text-white"><Pencil className="h-4 w-4" /> Edit job</Link>
           <Link href={`/employer/applicants?job=${job.id}`} className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-wazifny-navy"><Users className="h-4 w-4" /> Applicants</Link>
         </div>
@@ -59,7 +56,7 @@ export default function EmployerJobDetailsPage({ params }: { params: { id: strin
         {job.requirements.length ? <ul className="mt-3 list-inside list-disc space-y-2 text-sm text-slate-600">{job.requirements.map((requirement, index) => <li key={`${index}-${requirement}`}>{requirement}</li>)}</ul> : <p className="mt-3 text-sm text-slate-500">No requirements added.</p>}
         <h2 className="mt-7 font-semibold text-wazifny-navy">Application method</h2>
         <p className="mt-2 text-sm text-slate-600">{job.application_method === "external" ? "External application" : "Apply through Wazifny"}</p>
-        {safeExternalUrl(job.external_url) && <a href={safeExternalUrl(job.external_url)!} target="_blank" rel="noreferrer" className="mt-1 inline-block break-all text-sm text-wazifny-green underline">{job.external_url}</a>}
+        {job.external_url && <a href={job.external_url} target="_blank" rel="noreferrer" className="mt-1 inline-block break-all text-sm text-wazifny-green underline">{job.external_url}</a>}
       </section>
     </EmployerShell>
   );

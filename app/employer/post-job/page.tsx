@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, FilePlus, Loader2 } from "lucide-react";
 import EmployerShell from "@/components/employer/EmployerShell";
-import { createJob, getJob, updateJob, type JobCreate } from "@/lib/api";
+import { createJob, getMyJob, updateJob, type JobCreate } from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
 
 const CATEGORY_OPTIONS = [
@@ -45,12 +45,10 @@ export default function PostJobPage() {
 
   useEffect(() => {
     if (!token || !editingJobId) return;
-    let cancelled = false;
     setError(null);
     setIsLoadingJob(true);
-    getJob(editingJobId, token)
+    getMyJob(token, editingJobId)
       .then((job) => {
-        if (cancelled) return;
         const salaryParts = job.salary?.match(/\$?([\d,]+)\s*-\s*\$?([\d,?]+)/);
         setForm({
           title: job.title,
@@ -65,13 +63,8 @@ export default function PostJobPage() {
           external_url: job.external_url ?? "",
         });
       })
-      .catch((reason) => {
-        if (!cancelled) setError(reason instanceof Error ? reason.message : "Could not load this job.");
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoadingJob(false);
-      });
-    return () => { cancelled = true; };
+      .catch((reason) => setError(reason instanceof Error ? reason.message : "Could not load this job."))
+      .finally(() => setIsLoadingJob(false));
   }, [token, editingJobId]);
 
   function update<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {

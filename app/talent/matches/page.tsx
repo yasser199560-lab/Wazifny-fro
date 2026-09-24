@@ -14,7 +14,6 @@ import {
   type Job,
 } from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
-import { safeExternalUrl } from "@/lib/safe-url";
 
 function scoreColor(score: number) {
   if (score >= 80) return "bg-wazifny-green";
@@ -149,7 +148,7 @@ export default function AiMatchesPage() {
                 <div className="mt-4 flex gap-2">
                   {job.application_method === "external" ? (
                     <a
-                      href={safeExternalUrl(job.external_url) ?? undefined}
+                      href={job.external_url || "#"}
                       target="_blank"
                       rel="noreferrer"
                       className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-wazifny-orange px-4 py-2 text-sm font-semibold text-white hover:bg-wazifny-orange-dark"

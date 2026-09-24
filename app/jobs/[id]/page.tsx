@@ -18,7 +18,6 @@ import Footer from "@/components/landing/Footer";
 import { ApiError, applyToJob, getJob, saveJob, translateTexts, type Job } from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
-import { safeExternalUrl } from "@/lib/safe-url";
 
 const JOB_TYPE_LABEL: Record<string, string> = {
   full_time: "Full-time",
@@ -212,7 +211,7 @@ export default function JobDetailPage() {
 
             {job.application_method === "external" ? (
               <a
-                href={safeExternalUrl(job.external_url) ?? undefined}
+                href={job.external_url || "#"}
                 target="_blank"
                 rel="noreferrer"
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-wazifny-orange px-4 py-3 text-sm font-semibold text-white hover:bg-wazifny-orange-dark"
