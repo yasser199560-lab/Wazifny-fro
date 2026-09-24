@@ -1,5 +1,18 @@
-export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api/v1";
+const configuredApiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
+const configuredApiIsLocal = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/|$)/i.test(
+  configuredApiBaseUrl ?? ""
+);
+const defaultApiBaseUrl =
+  process.env.NODE_ENV === "production"
+    ? "https://wazifny-bac.onrender.com/api/v1"
+    : "http://localhost:8000/api/v1";
+
+const apiBaseUrl =
+  process.env.NODE_ENV === "production" && configuredApiIsLocal
+    ? defaultApiBaseUrl
+    : configuredApiBaseUrl || defaultApiBaseUrl;
+
+export const API_BASE_URL = apiBaseUrl.replace(/\/+$/, "");
 
 export class ApiError extends Error {
   status: number;
