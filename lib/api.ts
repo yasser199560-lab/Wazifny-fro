@@ -6,6 +6,8 @@ const DEFAULT_API_BASE_URL =
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? DEFAULT_API_BASE_URL;
 
+const API_REQUEST_TIMEOUT_MS = 12_000;
+
 export class ApiError extends Error {
   status: number;
   constructor(message: string, status: number) {
@@ -18,13 +20,22 @@ async function request<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const res = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers ?? {}),
-    },
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), API_REQUEST_TIMEOUT_MS);
+
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      signal: options.signal ?? controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers ?? {}),
+      },
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
 
   if (!res.ok) {
     let detail = res.statusText;
