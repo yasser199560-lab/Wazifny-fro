@@ -25,6 +25,17 @@ const ROLE_KEY = "wazifny_role";
 const NAME_KEY = "wazifny_name";
 const EMAIL_KEY = "wazifny_email";
 
+function setCookie(name: string, value: string, days = 7) {
+  if (typeof document === "undefined") return;
+  const expires = new Date(Date.now() + days * 864e5).toUTCString();
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; samesite=lax`;
+}
+
+function clearCookie(name: string) {
+  if (typeof document === "undefined") return;
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+}
+
 export const useAuthStore = create<AuthState>((set) => ({
   token: null,
   role: null,
@@ -39,6 +50,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       window.localStorage.setItem(NAME_KEY, fullName);
       window.localStorage.setItem(EMAIL_KEY, email);
     }
+    setCookie(TOKEN_KEY, token);
+    setCookie(ROLE_KEY, role);
     set({ token, role, fullName, email });
   },
 
@@ -53,6 +66,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       window.localStorage.removeItem(NAME_KEY);
       window.localStorage.removeItem(EMAIL_KEY);
     }
+    clearCookie(TOKEN_KEY);
+    clearCookie(ROLE_KEY);
     set({ token: null, role: null, fullName: null, email: null });
   },
 
