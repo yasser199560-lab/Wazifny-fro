@@ -1,18 +1,5 @@
-const configuredApiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
-const configuredApiIsLocal = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/|$)/i.test(
-  configuredApiBaseUrl ?? ""
-);
-const defaultApiBaseUrl =
-  process.env.NODE_ENV === "production"
-    ? "https://wazifny-bac.onrender.com/api/v1"
-    : "http://localhost:8000/api/v1";
-
-const apiBaseUrl =
-  process.env.NODE_ENV === "production" && configuredApiIsLocal
-    ? defaultApiBaseUrl
-    : configuredApiBaseUrl || defaultApiBaseUrl;
-
-export const API_BASE_URL = apiBaseUrl.replace(/\/+$/, "");
+export const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api/v1";
 
 export class ApiError extends Error {
   status: number;
@@ -108,7 +95,16 @@ export interface Job {
   application_method: "in_platform" | "external";
   external_url: string | null;
   description: string;
+  company_description?: string;
+  employment_level?: string;
+  work_arrangement?: string;
+  working_hours?: string;
+  responsibilities?: string[];
   requirements: string[];
+  nice_to_have?: string[];
+  benefits?: string[];
+  application_instructions?: string;
+  application_deadline?: string | null;
   status: string;
   posted_at: string | null;
   company_name: string | null;
@@ -576,7 +572,71 @@ export interface JobCreate {
   application_method: "in_platform" | "external";
   external_url?: string | null;
   description: string;
+  company_description: string;
+  employment_level: string;
+  work_arrangement: string;
+  working_hours: string;
+  responsibilities: string[];
   requirements: string[];
+  nice_to_have: string[];
+  benefits: string[];
+  application_instructions: string;
+  application_deadline: string | null;
+}
+
+export interface JobDraft {
+  title: string;
+  category: string;
+  location: string;
+  salary_min: string;
+  salary_max: string;
+  job_type: string;
+  description: string;
+  company_description: string;
+  employment_level: string;
+  work_arrangement: string;
+  working_hours: string;
+  responsibilities: string;
+  requirements: string;
+  nice_to_have: string;
+  benefits: string;
+  application_method: "in_platform" | "external";
+  external_url: string;
+  application_instructions: string;
+  application_deadline: string;
+}
+
+export async function analyzeJobPostImage(token: string, file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await fetch(`${API_BASE_URL}/jobs/analyze-image`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
+  if (!response.ok) {
+    let message = response.statusText;
+    try {
+      const body = await response.json();
+      message = body.detail ?? message;
+    } catch {
+      // Keep the HTTP status text when the response is not JSON.
+    }
+    throw new ApiError(typeof message === "string" ? message : "Image analysis failed", response.status);
+  }
+  return response.json() as Promise<{ fields: JobDraft; provider: string }>;
+}
+
+export function getJobDraft(token: string) {
+  return request<JobDraft>("/jobs/draft", { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" });
+}
+
+export function saveJobDraft(token: string, payload: JobDraft) {
+  return request<JobDraft>("/jobs/draft", { method: "PUT", headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) });
+}
+
+export function deleteJobDraft(token: string) {
+  return request<void>("/jobs/draft", { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
 }
 
 export function updateJob(token: string, jobId: string, payload: JobCreate) {
@@ -903,4 +963,18 @@ export async function uploadCv(token: string, file: File): Promise<CvUploadRespo
     throw new ApiError(typeof detail === "string" ? detail : "Upload failed", res.status);
   }
   return res.json();
+}
+
+export function removeCv(token: string) {
+  return request<TalentMe>("/talents/me/cv", {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export function clearTalentProfile(token: string) {
+  return request<TalentMe>("/talents/me/profile/reset", {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
 }
