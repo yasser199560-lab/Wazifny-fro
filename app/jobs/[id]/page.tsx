@@ -187,7 +187,7 @@ export default function JobDetailPage() {
 
             {job.company_description && <JobSection title="About the Company"><p className="whitespace-pre-line leading-relaxed text-slate-600">{job.company_description}</p></JobSection>}
             {job.working_hours && <JobSection title="Working Hours"><p className="text-slate-600">{job.working_hours}</p></JobSection>}
-            {job.responsibilities?.length > 0 && <JobSection title="Responsibilities"><JobList items={job.responsibilities} /></JobSection>}
+            {(job.responsibilities?.length ?? 0) > 0 && <JobSection title="Responsibilities"><JobList items={job.responsibilities ?? []} /></JobSection>}
 
             {job.requirements?.length > 0 && (
               <>
@@ -202,8 +202,8 @@ export default function JobDetailPage() {
                 </ul>
               </>
             )}
-            {job.nice_to_have?.length > 0 && <JobSection title="Nice to Have"><JobList items={job.nice_to_have} /></JobSection>}
-            {job.benefits?.length > 0 && <JobSection title="What We Offer"><JobList items={job.benefits} /></JobSection>}
+            {(job.nice_to_have?.length ?? 0) > 0 && <JobSection title="Nice to Have"><JobList items={job.nice_to_have ?? []} /></JobSection>}
+            {(job.benefits?.length ?? 0) > 0 && <JobSection title="What We Offer"><JobList items={job.benefits ?? []} /></JobSection>}
             {job.application_instructions && <JobSection title="How to Apply"><p className="whitespace-pre-line leading-relaxed text-slate-600">{job.application_instructions}</p></JobSection>}
           </div>
 
